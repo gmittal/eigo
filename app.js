@@ -26,7 +26,7 @@ app.post('/check', function (req, res) {
   if (googleDoc) {
   	if (email) {
 
-	  res.setHeader('Content-Type', 'application/json');
+	  // res.setHeader('Content-Type', 'application/json');
 
 	  console.log(googleDoc);
 	  console.log(email);
@@ -156,7 +156,7 @@ app.post('/check', function (req, res) {
 
 				    						fs.readFile("email_templates/template4.html", 'utf-8', function (err, fileData) {
 				    							if (err) {
-				    								res.send({"Error": "An error occurred."});
+				    								res.send("An error occurred.");
 				    							} else {
 				    							
 				    								var finalData = fileData;
@@ -172,9 +172,10 @@ app.post('/check', function (req, res) {
 													}, function(err, json) {
 													  if (err) { return console.error(err); }
 													  console.log(json);
+													  res.send("Your results should be sent to your email now.");
 													});
 
-				    								// res.send({"Success": "Your results should be sent to your email now."});
+				    								
 
 				    							}
 				    						});
@@ -189,23 +190,23 @@ app.post('/check', function (req, res) {
 
 
 		    } else {
-		    	res.send({"Error": "An error occurred. The document you sent was not a valid Google Doc."});
+		    	res.send("An error occurred. The document you sent was not a valid Google Doc.");
 		    } // end if Google Doc
 
 
 		  } else {
-		  	console.log(response.statusCode);
+		  	// console.log(response.statusCode);
 
-		  	res.send({"Error": "An error occurred."});
+		  	res.send("An error occurred.");
 		  }
 	  });
 
   } else {
-  	res.send({"Error": "Invalid parameters"});
+  	res.send("Invalid parameters");
   }
 
   } else {
-  	res.send({"Error": "Invalid parameters"});
+  	res.send("Invalid parameters");
   }
 
   

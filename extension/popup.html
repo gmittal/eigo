@@ -2,10 +2,86 @@
 <html>
   <head>
     <title>Eigo</title>
+    <link href='http://fonts.googleapis.com/css?family=Roboto:500,300,700,100,400' rel='stylesheet' type='text/css'>
     <script src="popup.js"></script>
+    <style>
+    input {
+    	width: 400px;
+    	font-family: 'Roboto';
+    	font-size: 12pt;
+    	padding: 5px;
+  		font-weight: 400;
+    	color: #e74c3c;
+    }
+
+    p {
+    	font-size: 10pt;
+    	font-weight: 400;
+    	font-family: 'Roboto';
+    	color:black;
+    }
+
+    input:focus {
+    	outline: none;
+    	outline-style: none;
+    }
+
+    h1 {
+    	color: #e74c3c;
+    	font-family: 'Roboto';
+    	font-weight: 300;
+    	line-height: 110%;
+    }
+
+    #checkPage {
+    	margin-top: 3px;
+    	width: 414px;
+    	padding-left: 5px;
+    	padding-right: 5px;
+    	padding-top: 10px;
+    	padding-bottom:10px;
+    	font-size: 12pt;
+    	border:none;
+    	color:white;
+    	font-family: 'Roboto';
+    	font-weight: 300;
+    	background-color: #c0392b;
+    	-webkit-transition:all .05s linear;
+    	-moz-transition:all .05s linear;
+    	-o-transition:all .05s linear;
+    	-ms-transition:all .05s linear;
+    }
+
+    #checkPage:hover {
+    	background-color: #e74c3c;
+    }
+
+    #checkPage:active {
+    	background-color: #27ae60;
+    }
+
+    button:focus {
+    	outline: none;
+    	outline-style: none;
+    }
+
+    #logo {
+    	display: inline-block;
+    	height: 17pt;
+    	vertical-align: middle;
+    	margin-top: -5px;
+    }
+    </style>
   </head>
   <body>
-    <h1>Eigo<h1>
-    <button id="checkPage">Check this page now!</button>
+    <h1><img src="http://www.gautam.cc/misc/eigo-logo.png" id="logo"/>&nbsp;Eigo</h1>
+    <p>Simply make your Google Doc public by doing the following in your <i>Sharing Settings</i>: <br />
+    <img src="http://puu.sh/jgvMq/3b993fb9e3.png" />
+
+    Then paste the URL below. Eigo will then email you a summary of all of the ways you could make your writing better.</p>
+    <input type="text" placeholder="Public Google Doc Link" id="link" />
+    <input type="text" placeholder="Your Email" id="email" />
+
+    <button id="checkPage">Generate Report</button>
   </body>
 </html>

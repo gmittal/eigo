@@ -5,14 +5,23 @@ document.addEventListener('DOMContentLoaded', function() {
     chrome.tabs.getSelected(null, function(tab) {
       d = document;
 
+
+
       var f = d.createElement('form');
-      f.action = 'http://gtmetrix.com/analyze.html?bm';
+      f.action = 'http://gautam.cc:3000/check';
       f.method = 'post';
       var i = d.createElement('input');
       i.type = 'hidden';
       i.name = 'url';
-      i.value = tab.url;
+      i.value = document.getElementById("link").value;
+
+      var j = d.createElement('input');
+      j.type = 'hidden';
+      j.name = 'email';
+      j.value = document.getElementById("email").value;
+
       f.appendChild(i);
+      f.appendChild(j);
       d.body.appendChild(f);
       f.submit();
     });
