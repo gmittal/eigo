@@ -86,7 +86,7 @@ app.post('/check', function (req, res) {
 												  to:       'gautam@mittal.net',
 												  from:     'other@example.com',
 												  subject:  'Hello World',
-												  text:     'My first email through SendGrid.'
+												  html:     htmlString
 												}, function(err, json) {
 												  if (err) { return console.error(err); }
 												  console.log(json);
@@ -141,6 +141,15 @@ String.prototype.insert = function (index, string) {
   else
     return string + this;
 };
+
+function urlify(text) {
+    var urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.replace(urlRegex, function(url) {
+        return '<a href="' + url + '">' + url + '</a>';
+    })
+    // or alternatively
+    // return text.replace(urlRegex, '<a href="$1">$1</a>')
+}
 
 
 var server = app.listen(port, function () {
