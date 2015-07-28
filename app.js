@@ -4,8 +4,9 @@ var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
 var cheerio = require('cheerio');
-var nodemailer = require('nodemailer');
+var fs = require('fs');
 var request = require('request');
+// var sendgrid = require('sendgrid')(sendgrid_api_key);
 var writeGood = require('write-good');
 
 var port = 3000;
@@ -24,51 +25,59 @@ app.post('/check', function (req, res) {
   // take in a google doc, spit out the contents
   request(googleDoc, function (error, response, body) {
 	  if (!error && response.statusCode == 200) {
-	    // $ = cheerio.load(body);
-	    // console.log($("script:nth-child(5)").text());
-
 	    var lines = body.split("\n");
 
-	    console.log(lines.length);
+	    var c = cheerio.load(body);
 
-	    for (var i = 0; i < lines.length; i++) {
-	    	if (lines[i].indexOf("DOCS_modelChunk = [{") > -1) {
-	    		console.log(i);
-	    		$ = cheerio.load(lines[i]);
+	    if (c("meta:nth-child(3)")["0"]["attribs"]["content"] == "Google Docs") {
+    		   
+    		    for (var i = 0; i < lines.length; i++) {
 
-	    		var scripts = $("script").text().split(";");
+			    	if (lines[i].indexOf("DOCS_modelChunk = [{") > -1) {
+			    		console.log(i);
+			    		$ = cheerio.load(lines[i]);
 
-	    		for (var j = 0; j < scripts.length; j++) {
-	    			if (scripts[j].indexOf("DOCS_modelChunk = [{") > -1) {
-	    				console.log(j);
+			    		var scripts = $("script").text().split(";");
 
-	    				var objs = scripts[j].split("},");
+			    		for (var j = 0; j < scripts.length; j++) {
+			    			if (scripts[j].indexOf("DOCS_modelChunk = [{") > -1) {
+			    				console.log(j);
 
-	    				for (var k = 0; k < objs.length; k++) {
-	    					if (objs[k].indexOf("DOCS_modelChunk = [{") > -1) {
+			    				var objs = scripts[j].split("},");
 
-	    						var json = (objs[k].replace('DOCS_modelChunk = ', '')) + "}]";
+			    				for (var k = 0; k < objs.length; k++) {
+			    					if (objs[k].indexOf("DOCS_modelChunk = [{") > -1) {
 
-	    						var data = JSON.parse(json)[0].s; // the Google Docs contents
+			    						var json = (objs[k].replace('DOCS_modelChunk = ', '')) + "}]";
 
-	    						console.log(data);
+			    						var data = JSON.parse(json)[0].s; // the Google Docs contents
 
-	    						var suggestions = writeGood(data);
+			    						console.log(data);
 
-	    						console.log(suggestions);
+			    						var suggestions = writeGood(data); // lint the writing piece
 
-
-	    					}
-	    				}
-
-	    			}
-	    		}
-
-	    		
+			    						console.log(suggestions);
 
 
-	    	}
-	    }
+			    						res.send({"Success": "Your results should be sent to your email now."});
+
+			    					}
+			    				}
+
+			    			}
+			    		}
+
+			    		
+
+
+			    	}
+			    } // end for loop
+
+
+	    } else {
+	    	res.send({"Error": "An error occurred. The document you sent was not a valid Google Doc."});
+	    } // end if Google Doc
+
 
 	  } else {
 	  	res.send({"Error": "An error occurred."});
@@ -77,7 +86,7 @@ app.post('/check', function (req, res) {
 
   
 
-  res.send({"Success": "Your results should be sent to your email now."});
+  
 
 });
 
