@@ -9,12 +9,14 @@ var bodyParser = require('body-parser');
 var cheerio = require('cheerio');
 var fs = require('fs');
 var request = require('request');
-var sendgrid = require('sendgrid')(sendgrid_api_key);
+var sendgrid = require('sendgrid')(process.env.SENDGRID_API_KEY);
+
 var writeGood = require('write-good');
 
 var port = 3000;
 
 app.use(bodyParser());
+app.use(express.static(__dirname + '/email_templates'));
 
 app.post('/check', function (req, res) {
   var googleDoc = req.body.url;
@@ -37,14 +39,14 @@ app.post('/check', function (req, res) {
     		    for (var i = 0; i < lines.length; i++) {
 
 			    	if (lines[i].indexOf("DOCS_modelChunk = [{") > -1) {
-			    		console.log(i);
+			    		// console.log(i);
 			    		$ = cheerio.load(lines[i]);
 
 			    		var scripts = $("script").text().split(";");
 
 			    		for (var j = 0; j < scripts.length; j++) {
 			    			if (scripts[j].indexOf("DOCS_modelChunk = [{") > -1) {
-			    				console.log(j);
+			    				// console.log(j);
 
 			    				var objs = scripts[j].split("},");
 
@@ -55,14 +57,49 @@ app.post('/check', function (req, res) {
 
 			    						var data = JSON.parse(json)[0].s; // the Google Docs contents
 
-			    						console.log(data);
-
 			    						var suggestions = writeGood(data); // lint the writing piece
 
 			    						console.log(suggestions);
 
+			    						var htmlString = data;
 
-			    						res.send({"Success": "Your results should be sent to your email now."});
+			    						var excess = 0;
+
+			    						for (var l = 0; l < suggestions.length; l++) {
+			    							htmlString = htmlString.insert(suggestions[l].index + excess, "<b>");
+			    							excess += "<b>".length;
+
+			    							htmlString = htmlString.insert(suggestions[l].index + suggestions[l].offset + excess, "</b>");
+			    							excess += "</b>".length;
+			    						}
+
+			    						htmlString = htmlString.replace(/\n/g, "<br />");
+
+			    						// console.log(htmlString);
+
+			    						fs.readFile("email_templates/template4.html", 'utf-8', function (err, fileData) {
+			    							if (err) {
+			    								res.send({"Error": "An error occurred."});
+			    							} else {
+			    								
+					    						sendgrid.send({
+												  to:       'gautam@mittal.net',
+												  from:     'other@example.com',
+												  subject:  'Hello World',
+												  text:     'My first email through SendGrid.'
+												}, function(err, json) {
+												  if (err) { return console.error(err); }
+												  console.log(json);
+												});
+
+			    								res.send({"Success": "Your results should be sent to your email now."});
+
+			    							}
+			    						});
+
+
+
+			    						
 
 			    					}
 			    				}
@@ -92,6 +129,19 @@ app.post('/check', function (req, res) {
   
 
 });
+
+
+String.prototype.splice = function( idx, rem, s ) {
+    return (this.slice(0,idx) + s + this.slice(idx + Math.abs(rem)));
+};
+
+String.prototype.insert = function (index, string) {
+  if (index > 0)
+    return this.substring(0, index) + string + this.substring(index, this.length);
+  else
+    return string + this;
+};
+
 
 var server = app.listen(port, function () {
   var host = server.address().address;
