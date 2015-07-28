@@ -20,121 +20,134 @@ app.use(bodyParser());
 app.use(express.static(__dirname + '/email_templates'));
 
 app.post('/check', function (req, res) {
-  var googleDoc = req.body.url;
-  var email = req.body.email;
+	var googleDoc = req.body.url;
+  	var email = req.body.email;
 
-  res.setHeader('Content-Type', 'application/json');
+  if (googleDoc) {
+  	if (email) {
 
-  console.log(googleDoc);
-  console.log(email);
+	  res.setHeader('Content-Type', 'application/json');
 
-  // take in a google doc, spit out the contents
-  request(googleDoc, function (error, response, body) {
-	  if (!error && response.statusCode == 200) {
-	    var lines = body.split("\n");
+	  console.log(googleDoc);
+	  console.log(email);
 
-	    var c = cheerio.load(body);
+	  // take in a google doc, spit out the contents
+	  request(googleDoc, function (error, response, body) {
+		  if (!error && response.statusCode == 200) {
+		    var lines = body.split("\n");
 
-	    if (c("meta:nth-child(3)")["0"]["attribs"]["content"] == "Google Docs") {
-    		   
-    		    for (var i = 0; i < lines.length; i++) {
+		    var c = cheerio.load(body);
 
-			    	if (lines[i].indexOf("DOCS_modelChunk = [{") > -1) {
-			    		// console.log(i);
-			    		$ = cheerio.load(lines[i]);
+		    if (c("meta:nth-child(3)")["0"]["attribs"]["content"] == "Google Docs") {
+	    		   
+		    		var docTitle = c("meta:nth-child(1)")["0"]["attribs"]["content"];
 
-			    		var scripts = $("script").text().split(";");
+	    		    for (var i = 0; i < lines.length; i++) {
 
-			    		for (var j = 0; j < scripts.length; j++) {
-			    			if (scripts[j].indexOf("DOCS_modelChunk = [{") > -1) {
-			    				// console.log(j);
+				    	if (lines[i].indexOf("DOCS_modelChunk = [{") > -1) {
+				    		// console.log(i);
+				    		$ = cheerio.load(lines[i]);
 
-			    				var objs = scripts[j].split("},");
+				    		var scripts = $("script").text().split(";");
 
-			    				for (var k = 0; k < objs.length; k++) {
-			    					if (objs[k].indexOf("DOCS_modelChunk = [{") > -1) {
+				    		for (var j = 0; j < scripts.length; j++) {
+				    			if (scripts[j].indexOf("DOCS_modelChunk = [{") > -1) {
+				    				// console.log(j);
 
-			    						var json = (objs[k].replace('DOCS_modelChunk = ', '')) + "}]";
+				    				var objs = scripts[j].split("},");
 
-			    						var data = JSON.parse(json)[0].s; // the Google Docs contents
+				    				for (var k = 0; k < objs.length; k++) {
+				    					if (objs[k].indexOf("DOCS_modelChunk = [{") > -1) {
 
-			    						var suggestions = writeGood(data); // lint the writing piece
+				    						var json = (objs[k].replace('DOCS_modelChunk = ', '')) + "}]";
 
-			    						console.log(suggestions);
+				    						var data = JSON.parse(json)[0].s; // the Google Docs contents
 
-			    						var htmlString = data;
+				    						var suggestions = writeGood(data); // lint the writing piece
 
-			    						var excess = 0;
+				    						console.log(suggestions);
 
-			    						var suggestionsListString = "";
+				    						var htmlString = data;
 
-			    						for (var l = 0; l < suggestions.length; l++) {
-			    							htmlString = htmlString.insert(suggestions[l].index + excess, '<span style="color:red; font-weight:bold;">');
-			    							excess += '<span style="color:red; font-weight:bold;">'.length;
+				    						var excess = 0;
 
-			    							htmlString = htmlString.insert(suggestions[l].index + suggestions[l].offset + excess, "</span>");
-			    							excess += "</span>".length;
+				    						var suggestionsListString = "";
 
-			    							suggestionsListString += "<li>" + suggestions[l].reason + "</li>";
-			    						}
+				    						for (var l = 0; l < suggestions.length; l++) {
+				    							htmlString = htmlString.insert(suggestions[l].index + excess, '<span style="color:red; font-weight:bold;">');
+				    							excess += '<span style="color:red; font-weight:bold;">'.length;
 
+				    							htmlString = htmlString.insert(suggestions[l].index + suggestions[l].offset + excess, "</span>");
+				    							excess += "</span>".length;
 
-			    						htmlString = htmlString.replace(/\n/g, "<br />");
-			    						// htmlString = urlify(htmlString); // to turn all of the hyperlinks into urls, except it doesn't have perfect regex matching
-
-			    						// console.log(htmlString);
-
-			    						fs.readFile("email_templates/template4.html", 'utf-8', function (err, fileData) {
-			    							if (err) {
-			    								res.send({"Error": "An error occurred."});
-			    							} else {
-			    								
-			    								var finalData = fileData;
-			    								finalData = fileData.replace("{USER-WORK-s6ZG5rnRHt4Ydg9O2fv7}", htmlString);
-			    								finalData = finalData.replace("{SUGGESTION-LIST-CWwbXpU8BUyEdAYULIrC}", suggestionsListString);
-			    								finalData = finalData.replace("{HEADER-MESSAGE-L4VTRRHMppErK8V07Bkq}", greetings.random);
-
-					    						sendgrid.send({
-												  to:       email,
-												  from:     'Eigo@eigo-results-do-not-reply.io',
-												  subject:  'Hello World',
-												  html:     finalData
-												}, function(err, json) {
-												  if (err) { return console.error(err); }
-												  console.log(json);
-												});
-
-			    								res.send({"Success": "Your results should be sent to your email now."});
-
-			    							}
-			    						});
+				    							suggestionsListString += "<li>" + suggestions[l].reason + "</li>";
+				    						}
 
 
+				    						htmlString = htmlString.replace(/\n/g, "<br />");
+				    						// htmlString = urlify(htmlString); // to turn all of the hyperlinks into urls, except it doesn't have perfect regex matching
 
-			    						
+				    						// console.log(htmlString);
 
-			    					}
-			    				}
+				    						fs.readFile("email_templates/template4.html", 'utf-8', function (err, fileData) {
+				    							if (err) {
+				    								res.send({"Error": "An error occurred."});
+				    							} else {
+				    								
+				    								var finalData = fileData;
+				    								finalData = fileData.replace("{USER-WORK-s6ZG5rnRHt4Ydg9O2fv7}", htmlString);
+				    								finalData = finalData.replace("{SUGGESTION-LIST-CWwbXpU8BUyEdAYULIrC}", suggestionsListString);
+				    								finalData = finalData.replace("{HEADER-MESSAGE-L4VTRRHMppErK8V07Bkq}", greetings.random);
 
-			    			}
-			    		}
+						    						sendgrid.send({
+													  to:       email,
+													  from:     'Eigo@eigo-results-do-not-reply.io',
+													  subject:  'Report for ' + docTitle,
+													  html:     finalData
+													}, function(err, json) {
+													  if (err) { return console.error(err); }
+													  console.log(json);
+													});
 
-			    		
+				    								res.send({"Success": "Your results should be sent to your email now."});
+
+				    							}
+				    						});
 
 
-			    	}
-			    } // end for loop
+
+				    						
+
+				    					}
+				    				}
+
+				    			}
+				    		}
+
+				    		
 
 
-	    } else {
-	    	res.send({"Error": "An error occurred. The document you sent was not a valid Google Doc."});
-	    } // end if Google Doc
+				    	}
+				    } // end for loop
 
 
-	  } else {
-	  	res.send({"Error": "An error occurred."});
-	  }
-  });
+		    } else {
+		    	res.send({"Error": "An error occurred. The document you sent was not a valid Google Doc."});
+		    } // end if Google Doc
+
+
+		  } else {
+		  	res.send({"Error": "An error occurred."});
+		  }
+	  });
+
+  } else {
+  	res.send({"Error": "Invalid parameters"});
+  }
+
+  } else {
+  	res.send({"Error": "Invalid parameters"});
+  }
 
   
 
