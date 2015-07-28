@@ -20,7 +20,7 @@ app.use(bodyParser());
 app.use(express.static(__dirname + '/email_templates'));
 
 app.post('/check', function (req, res) {
-	var googleDoc = "https://docs.google.com/document/d/1bWH2zTFgHgPFonvzm0oedjiiLOHzthMIhT4-PmLB9As/edit?pli=1";
+	var googleDoc = req.body.url;
   	var email = req.body.email;
 
   if (googleDoc) {
@@ -133,7 +133,7 @@ app.post('/check', function (req, res) {
 
 				    						var suggestionsListString = "";
 
-				    						htmlString = htmlString.replace(/\n/g, "<br />");
+				    						
 
 				    						for (var l = 0; l < suggestions.length; l++) {
 				    							htmlString = htmlString.insert(suggestions[l].index + excess, '<b>');
@@ -145,7 +145,7 @@ app.post('/check', function (req, res) {
 				    							suggestionsListString += "<li>" + suggestions[l].reason + "</li>";
 				    						}
 
-
+				    						htmlString = htmlString.replace(/\n/g, "<br />");
 				    						
 				    						// htmlString = urlify(htmlString); // to turn all of the hyperlinks into urls, except it doesn't have perfect regex matching
 
@@ -155,7 +155,7 @@ app.post('/check', function (req, res) {
 				    							if (err) {
 				    								res.send({"Error": "An error occurred."});
 				    							} else {
-				    								console.log("YOOOOOOOOOOO")
+				    							
 				    								var finalData = fileData;
 				    								finalData = fileData.replace("{USER-WORK-s6ZG5rnRHt4Ydg9O2fv7}", htmlString);
 				    								finalData = finalData.replace("{SUGGESTION-LIST-CWwbXpU8BUyEdAYULIrC}", suggestionsListString);
