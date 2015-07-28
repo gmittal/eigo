@@ -65,28 +65,38 @@ app.post('/check', function (req, res) {
 
 			    						var excess = 0;
 
-			    						for (var l = 0; l < suggestions.length; l++) {
-			    							htmlString = htmlString.insert(suggestions[l].index + excess, "<b>");
-			    							excess += "<b>".length;
+			    						var suggestionsListString = "";
 
-			    							htmlString = htmlString.insert(suggestions[l].index + suggestions[l].offset + excess, "</b>");
-			    							excess += "</b>".length;
+			    						for (var l = 0; l < suggestions.length; l++) {
+			    							htmlString = htmlString.insert(suggestions[l].index + excess, '<span style="color:red; font-weight:bold;">');
+			    							excess += '<span style="color:red; font-weight:bold;">'.length;
+
+			    							htmlString = htmlString.insert(suggestions[l].index + suggestions[l].offset + excess, "</span>");
+			    							excess += "</span>".length;
+
+			    							suggestionsListString += "<li>" + suggestions[l].reason + "</li>";
 			    						}
 
-			    						htmlString = htmlString.replace(/\n/g, "<br />");
 
-			    						// console.log(htmlString);
+			    						htmlString = htmlString.replace(/\n/g, "<br />");
+			    						// htmlString = urlify(htmlString); // to turn all of the hyperlinks into urls, except it doesn't have perfect regex matching
+
+			    						console.log(htmlString);
 
 			    						fs.readFile("email_templates/template4.html", 'utf-8', function (err, fileData) {
 			    							if (err) {
 			    								res.send({"Error": "An error occurred."});
 			    							} else {
 			    								
+			    								var finalData = fileData;
+			    								finalData = fileData.replace("{USER-WORK-s6ZG5rnRHt4Ydg9O2fv7}", htmlString);
+			    								finalData = finalData.replace("{SUGGESTION-LIST-CWwbXpU8BUyEdAYULIrC}", suggestionsListString);
+
 					    						sendgrid.send({
 												  to:       'gautam@mittal.net',
 												  from:     'other@example.com',
 												  subject:  'Hello World',
-												  html:     htmlString
+												  html:     finalData
 												}, function(err, json) {
 												  if (err) { return console.error(err); }
 												  console.log(json);
