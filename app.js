@@ -42,6 +42,10 @@ app.post('/check', function (req, res) {
 	    		   
 		    		var docTitle = c("meta:nth-child(1)")["0"]["attribs"]["content"];
 
+		    		var largeData = "";
+
+		    		var parsedItems = [];
+
 	    		    for (var i = 0; i < lines.length; i++) {
 
 				    	if (lines[i].indexOf("DOCS_modelChunk = [{") > -1) {
@@ -64,21 +68,60 @@ app.post('/check', function (req, res) {
 
 				    						var stringsss = objs[k].split("},");
 
-				    						var largeData = ""; // the file contents of the Google Doc
+				    						largeData = ""; // the file contents of the Google Doc
+
+				    						
+
+				    						// var c = 0;
 
 				    						for (var o = 0; o < stringsss.length; o++) {
+				    							// console.log(o);
+
 				    							if (stringsss[o].indexOf("DOCS_modelChunk = [{") > -1) {
+				    								// c++;
+				    								// console.log(o);		
+
 					    							// console.log(stringsss[o]);
 					    							var jsobj = stringsss[o].replace("DOCS_modelChunk = ", "");
 					    							jsobj += "}]";
 
-					    							var parsed = JSON.parse(jsobj)[0].s;	
-					    							largeData+=parsed;
+
+
+					    							var parsed = JSON.parse(jsobj)[0].s;
+					    							// console.log(parsed);
+
+
+
+					    							parsedItems.push(parsed);
+
+					    							// largeData += parsed;
+					    							// console.log(o);
+					    							// console.log(largeData);
 
 					    						}
 				    						}
 
-				    						console.log(largeData);
+											// console.log(parsedItems.length);				    						
+
+
+
+				    						
+
+				    					}
+				    				}
+
+				    			}
+				    		}
+
+
+
+
+				    		// console.log(largeData);
+
+				    					console.log(parsedItems.length);
+				    					largeData = parsedItems.join("");
+
+				    					console.log(parsedItems);
 
 				    						var suggestions = writeGood(largeData); // lint the writing piece
 
@@ -90,18 +133,20 @@ app.post('/check', function (req, res) {
 
 				    						var suggestionsListString = "";
 
-				    						for (var l = 0; l < suggestions.length; l++) {
-				    							htmlString = htmlString.insert(suggestions[l].index + excess, '<span style="color:red; font-weight:bold;">');
-				    							excess += '<span style="color:red; font-weight:bold;">'.length;
+				    						htmlString = htmlString.replace(/\n/g, "<br />");
 
-				    							htmlString = htmlString.insert(suggestions[l].index + suggestions[l].offset + excess, "</span>");
-				    							excess += "</span>".length;
+				    						for (var l = 0; l < suggestions.length; l++) {
+				    							htmlString = htmlString.insert(suggestions[l].index + excess, '<b>');
+				    							excess += '<b>'.length;
+
+				    							htmlString = htmlString.insert(suggestions[l].index + suggestions[l].offset + excess, "</b>");
+				    							excess += "</b>".length;
 
 				    							suggestionsListString += "<li>" + suggestions[l].reason + "</li>";
 				    						}
 
 
-				    						htmlString = htmlString.replace(/\n/g, "<br />");
+				    						
 				    						// htmlString = urlify(htmlString); // to turn all of the hyperlinks into urls, except it doesn't have perfect regex matching
 
 				    						// console.log(htmlString);
@@ -132,14 +177,6 @@ app.post('/check', function (req, res) {
 				    						});
 
 
-
-				    						
-
-				    					}
-				    				}
-
-				    			}
-				    		}
 
 				    		
 
