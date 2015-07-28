@@ -1,7 +1,8 @@
 {
   "manifest_version": 2,
 
-  "name": "Eigo",
+  "name": "Eigo: Proofread Anything In Seconds",
+  "short_name":"Eigo",
   "description": "This extension allows you to proofread and get suggestions for your publicly available Google Docs.",
   "version": "1.0",
 
