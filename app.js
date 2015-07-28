@@ -8,6 +8,7 @@ var app = express();
 var bodyParser = require('body-parser');
 var cheerio = require('cheerio');
 var fs = require('fs');
+var greetings = require('greetings');
 var request = require('request');
 var sendgrid = require('sendgrid')(process.env.SENDGRID_API_KEY);
 
@@ -81,7 +82,7 @@ app.post('/check', function (req, res) {
 			    						htmlString = htmlString.replace(/\n/g, "<br />");
 			    						// htmlString = urlify(htmlString); // to turn all of the hyperlinks into urls, except it doesn't have perfect regex matching
 
-			    						console.log(htmlString);
+			    						// console.log(htmlString);
 
 			    						fs.readFile("email_templates/template4.html", 'utf-8', function (err, fileData) {
 			    							if (err) {
@@ -91,10 +92,11 @@ app.post('/check', function (req, res) {
 			    								var finalData = fileData;
 			    								finalData = fileData.replace("{USER-WORK-s6ZG5rnRHt4Ydg9O2fv7}", htmlString);
 			    								finalData = finalData.replace("{SUGGESTION-LIST-CWwbXpU8BUyEdAYULIrC}", suggestionsListString);
+			    								finalData = finalData.replace("{HEADER-MESSAGE-L4VTRRHMppErK8V07Bkq}", greetings.random);
 
 					    						sendgrid.send({
-												  to:       'gautam@mittal.net',
-												  from:     'other@example.com',
+												  to:       email,
+												  from:     'Eigo@eigo-results-do-not-reply.io',
 												  subject:  'Hello World',
 												  html:     finalData
 												}, function(err, json) {

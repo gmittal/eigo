@@ -22,6 +22,7 @@
     "cheerio": "^0.19.0",
     "dotenv": "^1.2.0",
     "express": "^4.13.1",
+    "greetings": "0.0.7",
     "request": "^2.60.0",
     "sendgrid": "^1.9.2",
     "write-good": "^0.9.1"
