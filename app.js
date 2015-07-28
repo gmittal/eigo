@@ -30,11 +30,14 @@ app.post('/check', function (req, res) {
 
 	  console.log(googleDoc);
 	  console.log(email);
+	  // console.log(googleDoc);
 
 	  // take in a google doc, spit out the contents
 	  request(googleDoc, function (error, response, body) {
 		  if (!error && response.statusCode == 200) {
 		    var lines = body.split("\n");
+
+
 
 		    var c = cheerio.load(body);
 
