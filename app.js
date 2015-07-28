@@ -1,12 +1,15 @@
 // Copyright 2015 Gautam Mittal under the MIT License
 
+var dotenv = require('dotenv');
+dotenv.load();
+
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
 var cheerio = require('cheerio');
 var fs = require('fs');
 var request = require('request');
-// var sendgrid = require('sendgrid')(sendgrid_api_key);
+var sendgrid = require('sendgrid')(sendgrid_api_key);
 var writeGood = require('write-good');
 
 var port = 3000;
