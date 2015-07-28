@@ -20,7 +20,7 @@ app.use(bodyParser());
 app.use(express.static(__dirname + '/email_templates'));
 
 app.post('/check', function (req, res) {
-	var googleDoc = req.body.url;
+	var googleDoc = "https://docs.google.com/document/d/1bWH2zTFgHgPFonvzm0oedjiiLOHzthMIhT4-PmLB9As/edit?pli=1";
   	var email = req.body.email;
 
   if (googleDoc) {
@@ -48,26 +48,43 @@ app.post('/check', function (req, res) {
 				    		// console.log(i);
 				    		$ = cheerio.load(lines[i]);
 
-				    		var scripts = $("script").text().split(";");
+				    		var scripts = $("script").text().split("</script>");
 
 				    		for (var j = 0; j < scripts.length; j++) {
-				    			if (scripts[j].indexOf("DOCS_modelChunk = [{") > -1) {
+				    			if (scripts[j].indexOf('[{"ty"') > -1) {
 				    				// console.log(j);
+				    				// console.log(scripts[j]);
 
-				    				var objs = scripts[j].split("},");
+				    				var objs = scripts[j].split("DOCS_modelChunkParseStart = new Date().getTime();");
 
 				    				for (var k = 0; k < objs.length; k++) {
 				    					if (objs[k].indexOf("DOCS_modelChunk = [{") > -1) {
 
-				    						var json = (objs[k].replace('DOCS_modelChunk = ', '')) + "}]";
+				    						// console.log(objs[k]);
 
-				    						var data = JSON.parse(json)[0].s; // the Google Docs contents
+				    						var stringsss = objs[k].split("},");
 
-				    						var suggestions = writeGood(data); // lint the writing piece
+				    						var largeData = ""; // the file contents of the Google Doc
+
+				    						for (var o = 0; o < stringsss.length; o++) {
+				    							if (stringsss[o].indexOf("DOCS_modelChunk = [{") > -1) {
+					    							// console.log(stringsss[o]);
+					    							var jsobj = stringsss[o].replace("DOCS_modelChunk = ", "");
+					    							jsobj += "}]";
+
+					    							var parsed = JSON.parse(jsobj)[0].s;	
+					    							largeData+=parsed;
+
+					    						}
+				    						}
+
+				    						console.log(largeData);
+
+				    						var suggestions = writeGood(largeData); // lint the writing piece
 
 				    						console.log(suggestions);
 
-				    						var htmlString = data;
+				    						var htmlString = largeData;
 
 				    						var excess = 0;
 
@@ -93,7 +110,7 @@ app.post('/check', function (req, res) {
 				    							if (err) {
 				    								res.send({"Error": "An error occurred."});
 				    							} else {
-				    								
+				    								console.log("YOOOOOOOOOOO")
 				    								var finalData = fileData;
 				    								finalData = fileData.replace("{USER-WORK-s6ZG5rnRHt4Ydg9O2fv7}", htmlString);
 				    								finalData = finalData.replace("{SUGGESTION-LIST-CWwbXpU8BUyEdAYULIrC}", suggestionsListString);
@@ -109,7 +126,7 @@ app.post('/check', function (req, res) {
 													  console.log(json);
 													});
 
-				    								res.send({"Success": "Your results should be sent to your email now."});
+				    								// res.send({"Success": "Your results should be sent to your email now."});
 
 				    							}
 				    						});
@@ -137,6 +154,8 @@ app.post('/check', function (req, res) {
 
 
 		  } else {
+		  	console.log(response.statusCode);
+
 		  	res.send({"Error": "An error occurred."});
 		  }
 	  });
