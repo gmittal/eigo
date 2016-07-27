@@ -9,7 +9,15 @@ Send it a publicly available Google Doc and an email, get a custom generated rep
 
 
 ### Up and Running
-All you need is a .env file in the project root populated with the following information:
+Install dependencies.
+```
+$ [sudo] npm install
+```
+Create a ```.env``` file in the project root populated with the following information:
 ```
 SENDGRID_API_KEY=xxxxxxxxxxxxxxxxxxxxxxx
+```
+Then you can start the webserver.
+```
+$ node app.js
 ```
