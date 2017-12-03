@@ -14,7 +14,7 @@ var sendgrid = require('sendgrid')(process.env.SENDGRID_API_KEY);
 
 var writeGood = require('write-good');
 
-var port = 3000;
+var port = process.env.PORT || 3000;
 
 app.use(bodyParser());
 app.use(express.static(__dirname + '/email_templates'));
