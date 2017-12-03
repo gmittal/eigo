@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
       var f = d.createElement('form');
-      f.action = 'http://gautam.cc:3000/check';
+      f.action = 'http://eigo-server.herokuapp.com/check';
       f.method = 'post';
       var i = d.createElement('input');
       i.type = 'hidden';
